@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 from optparse import OptionParser
-from client import Client
 from urllib import urlretrieve
+import subprocess
 import tarfile
+
+from pypiclient import XmlRpcClient, ProjectDoesNotExist
 
 class Main(object):
     """Main class, provides an entry point for the install_distribution script.
@@ -13,7 +15,7 @@ class Main(object):
     def __init__(self):
         # retreive options
         self.options, self.args = self.get_options()
-        self.client = Client()
+        self.client = XmlRpcClient()
         
         argslen = len(self.args)
         if 1 <= argslen <= 2:
@@ -26,19 +28,22 @@ class Main(object):
             distribution_version = self.args[1]
         elif 1 <= argslen < 2:
             # ask for the version number
-            available_versions = self.client.get_project_versions(distribution_name)
-            print "Found versions of %s:" % distribution_name
-            for version in available_versions:
-                print "\t%s" % version
-            
-            distribution_version = \
-                raw_input("Which version do you want to install (hit enter for None)? ")
+            try:
+                available_versions = self.client.get_project_versions(distribution_name)
+                print "Found versions of %s:" % distribution_name
+                for version in available_versions:
+                    print "\t%s" % version
+                
+                distribution_version = \
+                    raw_input("Which version do you want to install (hit enter for None)? ")
+            except ProjectDoesNotExist as e:
+                print "The specified distribution does not exists: %s" % distribution_name
+                return
         
         if distribution_version == '':
             return
 
         self.install_distribution(distribution_name, distribution_version) 
-         
 
     def get_options(self):
         """Retrieves the options using OptionParser
@@ -56,10 +61,11 @@ class Main(object):
         url = self.client.get_project_url(name, version)
         filename, headers = urlretrieve(url)
         tar = tarfile.open(filename)
-        from ipdb import set_trace
-        set_trace()
         tar.extractall(path='/tmp/')
+        path = '/tmp/%s' % tar.getnames()[0]
         tar.close()
+        subprocess.call(["python", "%s/setup.py" % path, "clean"])
+
 
 if __name__ == "__main__":
     main = Main()

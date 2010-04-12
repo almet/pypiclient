@@ -1,11 +1,11 @@
 import xmlrpclib
 import sys
 
-#from exceptions import ProjectDoesNotExist
+from exceptions import ProjectDoesNotExist
 
 PYPI_XML_RPC_URL = 'http://python.org/pypi'
 
-class Client:
+class XmlRpcClient:
     """Lib to the XML/RPC PyPi Webservice.
 
     Provides some simple methods to interact with the Pypi repositories directly
