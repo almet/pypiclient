@@ -7,26 +7,43 @@ import tarfile
 
 from pypiclient import XmlRpcClient, ProjectDoesNotExist
 
-class Main(object):
+class InstallDistribution(object):
     """Main class, provides an entry point for the install_distribution script.
 
     """
 
     def __init__(self):
-        # retreive options
+        """Retreive options, build the XmlRpcClient and launch the script.
+
+        """
         usage = '%prog packagename [version]'
         self.parser = OptionParser(usage=usage)
         self.options, self.args = self.parser.parse_args()
-        
         self.client = XmlRpcClient()
-        
-        argslen = len(self.args)
-        if 1 <= argslen <= 2:
-            distribution_name = self.args[0]
+        dist_name = self.get_distribution_name(self.args)
+        dist_version = self.get_distribution_version(self.args, dist_name)
+
+        if dist_name and dist_version:
+            self.install_distribution(dist_name, dist_version)
+
+    def get_distribution_name(self, args):
+        """Get the name of the package from args.
+
+        """
+        if 1 <= len(args) <= 2:
+            return self.args[0]
         else:
             self.parser.error(
                 "thanks to specify the package name as the first argument")
-        
+            return None
+    
+    def get_distribution_version(self, args, distribution_name):
+        """Get distribution version from args, or by asking the user if 
+        needed, displaying a the list of existing versions from Pypi 
+        XmlRpcClient.
+
+        """
+        argslen = len(args)
         if argslen == 2:
             distribution_version = self.args[1]
         elif 1 <= argslen < 2:
@@ -41,12 +58,12 @@ class Main(object):
                     raw_input("Which version do you want to install (hit enter for None)? ")
             except ProjectDoesNotExist as e:
                 print "The specified distribution does not exists: %s" % distribution_name
-                return
+                return None
         
         if distribution_version == '':
-            return
+            distribution_version = None
 
-        self.install_distribution(distribution_name, distribution_version) 
+        return distribution_version
 
     def install_distribution(self, name, version):
         """Download and install the distribution.
@@ -60,6 +77,5 @@ class Main(object):
         tar.close()
         subprocess.call(["python", "%s/setup.py" % path, "clean"])
 
-
 if __name__ == "__main__":
-    main = Main()
+    InstallDistribution()
