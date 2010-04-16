@@ -71,7 +71,7 @@ class InstallDistribution(object):
         return distribution_version
 
     def install_distribution(self, name, version):
-        """Download and install the distribution by calling 
+        """Download, extract and install the distribution by calling 
         python setup.py install
 
         """
