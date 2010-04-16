@@ -62,7 +62,7 @@ class XmlRpcClient:
             raise ProjectDoesNotExist(project_name)
         return versions
 
-    def get_project_url(self, project_name, version=None):
+    def get_project_url(self, project_name, version=None, packagetype='sdist'):
         """Return the url of the specified project version::
 
             >>> client = Client()
@@ -72,13 +72,17 @@ class XmlRpcClient:
         As some projects do not specify a way to download an archive of their
         code, if it's the case, raise a ProjectDownloadUrlDoesNotExist
         exception.
+
+        By default this return only the url for the first sdist package found.
+        It's possible to specify another packagetype.
         """
         if version == None:
             version = self.get_project_versions(project_name, False)[0]
         server = self._get_server_proxy()
-        release_urls = server.release_urls(project_name, version)[0]
+        urls = server.release_urls(project_name, version)
+        url_infos = [url for url in urls if url['packagetype'] == packagetype][0]
 
-        if not release_urls.has_key('url'):
+        if not url_infos.has_key('url'):
             raise ProjectDownloadUrlDoesNotExist(project_name)
 
-        return release_urls['url']
+        return url_infos['url'] 

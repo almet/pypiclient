@@ -14,15 +14,18 @@ class Main(object):
 
     def __init__(self):
         # retreive options
-        self.options, self.args = self.get_options()
+        usage = '%prog packagename [version]'
+        self.parser = OptionParser(usage=usage)
+        self.options, self.args = self.parser.parse_args()
+        
         self.client = XmlRpcClient()
         
         argslen = len(self.args)
         if 1 <= argslen <= 2:
             distribution_name = self.args[0]
         else:
-            print "error."
-            return
+            self.parser.error(
+                "thanks to specify the package name as the first argument")
         
         if argslen == 2:
             distribution_version = self.args[1]
@@ -44,15 +47,6 @@ class Main(object):
             return
 
         self.install_distribution(distribution_name, distribution_version) 
-
-    def get_options(self):
-        """Retrieves the options using OptionParser
-
-        """
-
-        usage = '%prog name [version]'
-        parser = OptionParser(usage=usage)
-        return parser.parse_args()
 
     def install_distribution(self, name, version):
         """Download and install the distribution.
