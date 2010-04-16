@@ -1,10 +1,10 @@
 """Tests for the PyPiClient module"""
 
-import unittest
-import client
-import exceptions
-import xmlrpclib
 from mock import Mock
+import unittest
+import xmlrpclib
+
+import client
 
 class TestXmlRpcClient(unittest.TestCase):
     """Tests for the XmlRpc Client.
@@ -52,7 +52,7 @@ class TestXmlRpcClient(unittest.TestCase):
             'a list of value must remain a list of values')
 
         self._mock_xmlrpc_method('package_releases', [])
-        self.assertRaises(exceptions.ProjectDoesNotExist, 
+        self.assertRaises(client.ProjectDoesNotExist, 
             self.client.get_project_versions, 'Foo')
 
     def test_get_project_url(self):

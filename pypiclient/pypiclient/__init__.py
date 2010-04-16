@@ -1,2 +1,2 @@
-from exceptions import *
+from errors import *
 from client import XmlRpcClient

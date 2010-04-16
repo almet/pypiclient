@@ -1,6 +1,7 @@
 import xmlrpclib
 import sys
-from exceptions import ProjectDoesNotExist
+
+from errors import ProjectDoesNotExist
 
 PYPI_XML_RPC_URL = 'http://python.org/pypi'
 
