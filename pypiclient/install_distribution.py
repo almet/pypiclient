@@ -4,6 +4,9 @@ from optparse import OptionParser
 from urllib import urlretrieve
 import subprocess
 import tarfile
+import tempfile
+import os
+import shutil
 
 from pypiclient import XmlRpcClient, ProjectDoesNotExist
 
@@ -55,7 +58,9 @@ class InstallDistribution(object):
                     print "\t%s" % version
                 
                 distribution_version = \
-                    raw_input("Which version do you want to install (hit enter for None)? ")
+                    raw_input("Which version do you want to install (hit " \
+                    "enter for None)? ")
+
             except ProjectDoesNotExist as e:
                 print "The specified distribution does not exists: %s" % distribution_name
                 return None
@@ -66,16 +71,20 @@ class InstallDistribution(object):
         return distribution_version
 
     def install_distribution(self, name, version):
-        """Download and install the distribution.
+        """Download and install the distribution by calling 
+        python setup.py install
 
         """
         url = self.client.get_project_url(name, version)
         filename, headers = urlretrieve(url)
         tar = tarfile.open(filename)
-        tar.extractall(path='/tmp/')
-        path = '/tmp/%s' % tar.getnames()[0]
+        temppath = tempfile.mkdtemp()
+        tar.extractall(path=temppath)
+        path = '%s/%s/' % (temppath, tar.getnames()[0])
         tar.close()
-        subprocess.call(["python", "%s/setup.py" % path, "clean"])
+        os.chdir(path)
+        os.system('python setup.py install')
+        shutil.rmtree(temppath)
 
 if __name__ == "__main__":
     InstallDistribution()
