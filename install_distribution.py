@@ -23,6 +23,8 @@ class InstallDistribution(object):
         self.parser = OptionParser(usage=usage)
         self.options, self.args = self.parser.parse_args()
         self.client = XmlRpcClient()
+        
+    def run(self):
         dist_name = self.get_distribution_name(self.args)
         dist_version = self.get_distribution_version(self.args, dist_name)
 
@@ -34,7 +36,7 @@ class InstallDistribution(object):
 
         """
         if 1 <= len(args) <= 2:
-            return self.args[0]
+            return args[0]
         else:
             self.parser.error(
                 "thanks to specify the package name as the first argument")
@@ -48,7 +50,7 @@ class InstallDistribution(object):
         """
         argslen = len(args)
         if argslen == 2:
-            distribution_version = self.args[1]
+            distribution_version = args[1]
         elif 1 <= argslen < 2:
             # ask for the version number
             try:
@@ -87,4 +89,5 @@ class InstallDistribution(object):
         shutil.rmtree(temppath)
 
 if __name__ == "__main__":
-    InstallDistribution()
+    main = InstallDistribution()
+    main.run()
