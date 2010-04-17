@@ -2,7 +2,7 @@ import unittest
 from mock import Mock, Sentinel
 
 from optparse import OptionParser
-from install_distribution import InstallDistribution, ProjectDoesNotExist
+import install_distribution 
 from pypiclient.client import XmlRpcClient
 
 class InstallDistributionTestCase(unittest.TestCase):
@@ -14,7 +14,7 @@ class InstallDistributionTestCase(unittest.TestCase):
         """Construct the object to test.
 
         """
-        self.object = InstallDistribution()
+        self.object = install_distribution.InstallDistribution()
         self.object.parser = Mock(OptionParser)()
         self.object.options = None
         self.object.client = Mock(XmlRpcClient)()
@@ -61,24 +61,34 @@ class InstallDistributionTestCase(unittest.TestCase):
             self.assertTrue(self.object.parser.error.called)
 
     def test_get_distribution_version(self):
-        return
-        def raise_exception():
-            raise ProjectDoesNotExist()
+        """TODO: Mock python input/output in a better way
 
+        """
+        def raise_exception(*args, **kwargs):
+            raise install_distribution.ProjectDoesNotExist()
+
+        # determine version from args
         self.assertEqual(self.object.get_distribution_version(
             ["Foo", "1.1"], "Foo"), "1.1")
 
         self.assertEqual(self.object.get_distribution_version(
-            ["Foo", ""]), None)
+            ["Foo", ""], "Foo"), None)
 
+        # prompt user
         self.object.client.get_project_versions = Mock(
             return_value=["1.1", "1.2", "1.3"])
+        
+        install_distribution.raw_input = Mock(return_value="")
+        self.assertEqual(self.object.get_distribution_version(
+            ["Foo"], "Foo"), None)
 
-
-
-        self.object.client.get_project_versions = Mock(
-            side_effect=raise_exception)
-                
+        install_distribution.raw_input = Mock(return_value="1.1")
+        self.assertEqual(self.object.get_distribution_version(
+            ["Foo"], "Foo"), "1.1")
+        
+        self.object.client.get_project_versions.side_effect = raise_exception
+        self.assertEqual(self.object.get_distribution_version(
+            ["UnexistingProject"], "UnexistingProject"), None)
  
 if __name__ == '__main__':
     unittest.main()
