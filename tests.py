@@ -3,7 +3,7 @@ from mock import Mock, Sentinel
 
 from optparse import OptionParser
 import install_distribution 
-from pypiclient.client import XmlRpcClient
+import pypiclient
 
 class InstallDistributionTestCase(unittest.TestCase):
     """Test the command line installer behavior.
@@ -17,7 +17,7 @@ class InstallDistributionTestCase(unittest.TestCase):
         self.object = install_distribution.InstallDistribution()
         self.object.parser = Mock(OptionParser)()
         self.object.options = None
-        self.object.client = Mock(XmlRpcClient)()
+        self.object.client = Mock(pypiclient.client.XmlRpcClient)()
 
     def _test_run(self, name, version):
         """Test the run method when values are defined by the user.
